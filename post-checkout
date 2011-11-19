@@ -1,0 +1,74 @@
+#!/usr/bin/python
+
+import os
+import re
+import sys
+
+STATUSES = {
+    'A': 'added',
+    'D': 'deleted',
+    'M': 'modified'
+}
+
+DIRECTIONS = {
+    'F': 'forward',
+    'B': 'backward',
+}
+
+def display_status(status):
+    return STATUSES.get(status)
+
+class Migration(object):
+
+    def __init__(self, app, migration, direction="F", **kwargs):
+        self.app = app
+        self.migration = migration
+        if not direction in DIRECTIONS.keys():
+            raise ValueError('Invalid value for direction')
+        self.direction = direction
+        self.old = kwargs.pop('old', None)
+
+    def migrate(self):
+        if self.direction == 'B':
+            os.system('git checkout %s %s/migrations' % (self.old, self.app))
+        cmd = 'python manage.py migrate %s %s' % (self.app, self.migration)
+        print cmd
+        os.system(cmd)
+        if self.direction == 'B':
+            os.system('git reset HEAD %s %s/migrations' % (self.old, self.app))
+            os.system('git clean -f %s %s/migrations' %(self.old, self.app))
+
+def main():
+    args = sys.argv
+    old = args[1]
+    new = args[2]
+
+    migrations = []
+
+    cmd = 'git diff --name-status %s %s | grep /migrations/' % (
+        old, new)
+    for line in os.popen(cmd).readlines():
+        status, filename = line.split()
+        print '%s was %s' % (filename, display_status(status))
+        # search for the migration number
+        migration_re = re.compile('\d+').search(filename)
+        app_re = re.compile('\w+').search(filename)
+        if migration_re and app_re:
+            m = migration_re.group()
+            if status == 'D':
+                direction = 'B'
+                m = '000' + str(int(m.lstrip('0'))-1)
+            else:
+                direction = 'F'
+            migration = Migration(app_re.group(),
+                    m, direction, old=old)
+            migrations.append(migration)
+
+    for migration in migrations:
+        migration.migrate()
+
+    # TODO: what to do with modified migrations?
+
+
+if __name__ == '__main__':
+    main()
