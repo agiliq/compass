@@ -4,6 +4,8 @@ import os
 import re
 import sys
 
+from itertools import groupby
+
 STATUSES = {
     'A': 'added',
     'D': 'deleted',
@@ -35,9 +37,13 @@ class MigrationList(object):
         return self.items.remove(migration)
 
     def plan(self):
-        #sorted(self.items, key='migration')
+        for key, group in groupby(self.items, lambda x: x.app):
+            for item in group:
+                print item
+
+    def migrate_all(self):
         for item in self.items:
-            print item
+            item.migrate()
 
 class Migration(object):
 
@@ -87,10 +93,10 @@ def main():
                 direction = 'F'
             migration = Migration(app_re.group(),
                     migration_re.group(), direction, old=old)
-            print migration
             migrations.add(migration)
 
-    #print migrations.plan()
+    migrations.plan()
+    migrations.migrate_all()
 
     # TODO: what to do with modified migrations?
 
