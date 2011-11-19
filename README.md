@@ -1,14 +1,14 @@
 WHAT:
 -----
 
-Compass is a tool to guide your south migration... in django.
+Compass is a tool to guide your south migrations.
 
 It is a git hook that keeps your south migrations in sync with your repository.
 
 INSTALL:
 --------
 
-Setup and packing coming soon
+Setup and packaging coming soon
 
 Untill then, just put `bin` in your PATH.
 
@@ -20,7 +20,7 @@ EXAMPLE:
 --------
 
     $ git branch
-        \* master
+        * master
         feature1
         feature2
 
@@ -39,4 +39,4 @@ EXAMPLE:
 THANKS:
 -------
 
-Compass is inspired by [hookup](https://github.com/tpope/hookup).
+Compass was inspired by [hookup](https://github.com/tpope/hookup) for rails.
