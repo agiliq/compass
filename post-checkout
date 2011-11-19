@@ -22,11 +22,13 @@ class Migration(object):
 
     def __init__(self, app, migration, direction="F", **kwargs):
         self.app = app
-        self.migration = migration
         if not direction in DIRECTIONS.keys():
             raise ValueError('Invalid value for direction')
         self.direction = direction
         self.old = kwargs.pop('old', None)
+        self.migration = migration
+        if self.direction == 'B':
+            self.migration = str(int(migration.lstrip('0'))-1).zfill(4)
 
     def migrate(self):
         if self.direction == 'B':
@@ -54,14 +56,12 @@ def main():
         migration_re = re.compile('\d+').search(filename)
         app_re = re.compile('\w+').search(filename)
         if migration_re and app_re:
-            m = migration_re.group()
             if status == 'D':
                 direction = 'B'
-                m = '000' + str(int(m.lstrip('0'))-1)
             else:
                 direction = 'F'
             migration = Migration(app_re.group(),
-                    m, direction, old=old)
+                    migration_re.group(), direction, old=old)
             migrations.append(migration)
 
     for migration in migrations:
