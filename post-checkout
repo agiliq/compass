@@ -37,6 +37,8 @@ class MigrationList(object):
         return self.items.remove(migration)
 
     def plan(self):
+        self.items.sort(key=lambda x: (x.app, x.direction, x.migration))
+        # TODO: migrate to the last point of the group
         for key, group in groupby(self.items, lambda x: x.app):
             for item in group:
                 print item
