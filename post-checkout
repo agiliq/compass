@@ -18,6 +18,27 @@ DIRECTIONS = {
 def display_status(status):
     return STATUSES.get(status)
 
+def display_direction(direction):
+    return DIRECTIONS.get(direction)
+
+class MigrationList(object):
+
+    def __init__(self, items=None):
+        if items:
+            self.items = items
+        self.items = []
+
+    def add(self, migration):
+        return self.items.append(migration)
+
+    def remove(self, migration):
+        return self.items.remove(migration)
+
+    def plan(self):
+        #sorted(self.items, key='migration')
+        for item in self.items:
+            print item
+
 class Migration(object):
 
     def __init__(self, app, migration, direction="F", **kwargs):
@@ -29,6 +50,11 @@ class Migration(object):
         self.migration = migration
         if self.direction == 'B':
             self.migration = str(int(migration.lstrip('0'))-1).zfill(4)
+
+    def __str__(self):
+        return 'migrate %s %s to %s' % (self.app,
+                display_direction(self.direction),
+                self.migration)
 
     def migrate(self):
         if self.direction == 'B':
@@ -45,13 +71,12 @@ def main():
     old = args[1]
     new = args[2]
 
-    migrations = []
+    migrations = MigrationList()
 
     cmd = 'git diff --name-status %s %s | grep /migrations/' % (
         old, new)
     for line in os.popen(cmd).readlines():
         status, filename = line.split()
-        print '%s was %s' % (filename, display_status(status))
         # search for the migration number
         migration_re = re.compile('\d+').search(filename)
         app_re = re.compile('\w+').search(filename)
@@ -62,10 +87,10 @@ def main():
                 direction = 'F'
             migration = Migration(app_re.group(),
                     migration_re.group(), direction, old=old)
-            migrations.append(migration)
+            print migration
+            migrations.add(migration)
 
-    for migration in migrations:
-        migration.migrate()
+    #print migrations.plan()
 
     # TODO: what to do with modified migrations?
 
