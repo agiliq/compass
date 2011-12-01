@@ -56,6 +56,7 @@ class Migration(object):
         self.direction = direction
         self.old = kwargs.pop('old', None)
         self.migration = migration
+        self.prefix = kwargs.pop('prefix', '')
         if self.direction == 'B':
             self.migration = str(int(migration.lstrip('0'))-1).zfill(4)
 
@@ -66,13 +67,13 @@ class Migration(object):
 
     def migrate(self):
         if self.direction == 'B':
-            os.system('git checkout %s %s/migrations' % (self.old, self.app))
+            os.system('git checkout %s %s%s/migrations' % (self.old, self.prefix, self.app))
         cmd = 'python manage.py migrate %s %s' % (self.app, self.migration)
         print cmd
         os.system(cmd)
         if self.direction == 'B':
-            os.system('git reset HEAD %s %s/migrations' % (self.old, self.app))
-            os.system('git clean -f %s %s/migrations' %(self.old, self.app))
+            os.system('git reset HEAD %s %s%s/migrations' % (self.old, self.prefix, self.app))
+            os.system('git clean -f %s %s%s/migrations' %(self.old, self.prefix, self.app))
 
 
 def post_checkout(old, new):
@@ -82,17 +83,17 @@ def post_checkout(old, new):
     cmd = 'git diff --name-status %s %s | grep /migrations/' % (
         old, new)
     for line in os.popen(cmd).readlines():
-        status, filename = line.split()
+        status, filepath = line.split()
         # search for the migration number
-        migration_re = re.compile('\d+').search(filename)
-        app_re = re.compile('\w+').search(filename)
-        if migration_re and app_re:
+        app, text, migration = re.compile('\w+/migrations/\d+').search(filepath).group().split('/')
+        prefix = filepath.split(app)[0]
+        if app and migration:
             if status == 'D':
                 direction = 'B'
             else:
                 direction = 'F'
-            migration = Migration(app_re.group(),
-                    migration_re.group(), direction, old=old)
+            migration = Migration(app,
+                    migration, direction, old=old, prefix=prefix)
             migrations.add(migration)
 
     migrations.plan()
