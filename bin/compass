@@ -93,16 +93,18 @@ def post_checkout(old, new, options):
     for line in os.popen(cmd).readlines():
         status, filepath = line.split()
         # search for the migration number
-        app, text, migration = re.compile('\w+/migrations/\d+').search(filepath).group().split('/')
-        prefix = filepath.split(app)[0]
-        if app and migration:
-            if status == 'D':
-                direction = 'B'
-            else:
-                direction = 'F'
-            migration = Migration(app,
-                    migration, direction, old=old, options=options, prefix=prefix)
-            migrations.add(migration)
+        match = re.compile('\w+/migrations/\d+').search(filepath)
+        if match:
+            app, text, migration = match.group().split('/')
+            prefix = filepath.split(app)[0]
+            if app and migration:
+                if status == 'D':
+                    direction = 'B'
+                else:
+                    direction = 'F'
+                migration = Migration(app,
+                        migration, direction, old=old, options=options, prefix=prefix)
+                migrations.add(migration)
 
     migrations.plan()
     migrations.migrate_all()
