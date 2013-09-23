@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export FOOBAR="tests/foobar"
+export FOOBAR="_build/foobar"
 
 assertEqual() {
     if [[ "$1" == "$2" ]];
@@ -27,11 +27,11 @@ syncdb() {
 }
 
 clean() {
-    rm -rf tests/foobar/
+    rm -rf _build/foobar/
 }
 
 extract_test_repo() {
-    pushd tests
+    pushd _build
     tar -xzf foobar.tar.gz
     popd
 }
