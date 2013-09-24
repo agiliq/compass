@@ -15,14 +15,16 @@ It is a git hook that keeps your south migrations in sync with your repository.
 Installation
 ------------
 
-pip install django-south-compass
+.. code-block:: bash
+
+    $ pip install django-south-compass
 
 Usage
 -----
 
 Go to your git repo and do:
 
-.. code-block: bash
+.. code-block:: bash
 
     $ django-south-compass install
 
@@ -39,16 +41,17 @@ Eg.
         feature2
 
     $ git checkout feature1
-        *Migrates to any new migrations added in feature1*
+    # Migrates to any new migrations added in feature1
 
     $ git checkout master
-        *Migrates back to the last migration in master*
+    # Migrates back to the last migration in master
 
     $ git checkout feature2
-        *Does the same for feature2*
+    # Migrates to any new migrations added in feature2
 
     $ git checkout feature1
-        *Migrates back to the last migration common between feature1 and feature2, then migrates forward to feature1*
+    # Migrates back to the last migration common between
+    # feature1 and feature2, then migrates forward to feature1
 
 
 License
