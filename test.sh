@@ -37,7 +37,15 @@ extract_test_repo() {
     popd
 }
 
+install_compass() {
+    pip install -e .
+    pushd $FOOBAR
+    django-south-compass install
+    popd
+}
+
 extract_test_repo
+install_compass
 syncdb
 # master => id, name
 # branch1 => id, name, bar1
