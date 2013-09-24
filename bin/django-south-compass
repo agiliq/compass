@@ -18,6 +18,8 @@ DIRECTIONS = {
     'B': 'backward',
 }
 
+CMD, _ = os.path.splitext(__file__)
+
 def display_status(status):
     return STATUSES.get(status)
 
@@ -128,7 +130,7 @@ def main():
 
         elif command == 'install':
 
-            cmd = 'compass post-checkout $@'
+            cmd = '%s post-checkout $@' % CMD
             if options.manage:
                 cmd += ' --manage %s' %options.manage
             if options.settings:
@@ -144,10 +146,10 @@ def main():
 
         else:
 
-            print 'Use `compass install` to install to current repository'
+            print 'Use `%s install` to install to current repository' % CMD
 
     else:
-        print 'Use `compass install` to install to current repository'
+        print 'Use `%s install` to install to current repository' % CMD
 
 if __name__ == '__main__':
     main()
