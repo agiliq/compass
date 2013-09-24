@@ -18,7 +18,7 @@ DIRECTIONS = {
     'B': 'backward',
 }
 
-CMD, _ = os.path.splitext(__file__)
+CMD, _ = os.path.splitext(os.path.basename(__file__))
 
 def display_status(status):
     return STATUSES.get(status)
