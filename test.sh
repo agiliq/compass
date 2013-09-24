@@ -44,6 +44,7 @@ install_compass() {
     popd
 }
 
+clean
 extract_test_repo
 install_compass
 syncdb
