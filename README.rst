@@ -66,4 +66,6 @@ For bug reports open a github ticket. Patches gratefully accepted. Need help? `C
 Thanks
 ------
 
-Django south compass was inspired by [hookup](https://github.com/tpope/hookup) for rails.
+Django south compass was inspired by `hookup`_ for rails.
+
+.. _hookup: https://github.com/tpope/hookup
