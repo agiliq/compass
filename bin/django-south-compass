@@ -46,9 +46,9 @@ class MigrationList(object):
             for item in group:
                 print item
 
-    def migrate_all(self):
+    def migrate_all(self, options):
         for item in self.items:
-            item.migrate()
+            item.migrate(options)
 
 class Migration(object):
 
@@ -75,10 +75,12 @@ class Migration(object):
                 display_direction(self.direction),
                 self.migration)
 
-    def migrate(self):
+    def migrate(self, options):
         if self.direction == 'B':
             os.system('git checkout %s %s%s/migrations' % (self.old, self.prefix, self.app))
         cmd = '%s migrate %s %s' % (self.manage_cmd, self.app, self.migration)
+        if options.merge:
+            cmd += " --merge"
         print cmd
         os.system(cmd)
         if self.direction == 'B':
@@ -109,13 +111,14 @@ def post_checkout(old, new, options):
                 migrations.add(migration)
 
     migrations.plan()
-    migrations.migrate_all()
+    migrations.migrate_all(options)
 
 def main():
 
     parser = OptionParser()
 
     parser.add_option("-m", "--manage")
+    parser.add_option("-M", "--merge", action="store_true")
     parser.add_option("-s", "--settings")
 
     options, args = parser.parse_args()
@@ -135,6 +138,8 @@ def main():
                 cmd += ' --manage %s' %options.manage
             if options.settings:
                 cmd += ' --settings %s' %options.settings
+            if options.merge:
+                cmd += ' --merge'
 
             f = file('.git/hooks/post-checkout', 'w')
             f.write('#!/bin/bash\n')
