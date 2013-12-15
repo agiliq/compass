@@ -28,10 +28,10 @@ Go to your git repo and do:
 
     $ django-south-compass install
 
-This will setup a git hook so that whenever you checkout a branch, you're
+This will set up a git hook so that whenever you checkout a branch, your
 migrations are synced up.
 
-Eg.
+E.g.
 
 .. code-block:: bash
 
@@ -62,7 +62,7 @@ License
 Bug report and Help
 -------------------
 
-For bug reports open a github ticket. Patches gratefully accepted. Need help? `Contact us here`_
+For bug reports, open a github ticket. Patches gratefully accepted. Need help? `Contact us here`_
 
 .. _contact us here: http://agiliq.com/contactus
 
