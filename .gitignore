@@ -1,1 +1,4 @@
+build/
+dist/
+django_south_compass.egg-info/
 tests/foobar
