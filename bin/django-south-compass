@@ -10,7 +10,7 @@ from optparse import OptionParser
 STATUSES = {
     'A': 'added',
     'D': 'deleted',
-    'M': 'modified'
+    'M': 'modified',
 }
 
 DIRECTIONS = {
@@ -28,16 +28,24 @@ def display_direction(direction):
 
 class MigrationList(object):
 
-    def __init__(self, items=None):
+    manage_cmd = 'python manage.py'
+
+    def __init__(self, items=None, options=None):
+        self.items = []
+        self.options = options
+
         if items:
             self.items = items
-        self.items = []
+        if self.options.manage:
+            self.manage_cmd = 'python %s' % self.options.manage
+        if self.options.settings:
+            self.manage_cmd += ' %s' % self.options.settings
 
     def add(self, migration):
-        return self.items.append(migration)
+        self.items.append(migration)
 
     def remove(self, migration):
-        return self.items.remove(migration)
+        self.items.remove(migration)
 
     def plan(self):
         self.items.sort(key=lambda x: (x.app, x.direction, x.migration))
@@ -46,27 +54,22 @@ class MigrationList(object):
             for item in group:
                 print item
 
-    def migrate_all(self, options):
+    def migrate_all(self):
         for item in self.items:
-            item.migrate(options)
+            item.migrate(self.manage_cmd, self.options)
 
 class Migration(object):
 
-    manage_cmd = 'python manage.py'
-
-    def __init__(self, app, migration, direction="F", **kwargs):
-        self.app = app
+    def __init__(self, app, migration, old, direction="F", prefix=''):
         if not direction in DIRECTIONS.keys():
             raise ValueError('Invalid value for direction')
-        self.direction = direction
-        self.old = kwargs.pop('old', None)
+
+        self.app = app
         self.migration = migration
-        self.prefix = kwargs.pop('prefix', '')
-        self.options = kwargs.pop('options', None)
-        if self.options.manage:
-            self.manage_cmd = 'python %s' %self.options.manage
-        if self.options.settings:
-            self.manage_cmd += ' %s' %self.options.settings
+        self.old = old
+        self.direction = direction
+        self.prefix = prefix
+
         if self.direction == 'B':
             self.migration = str(int(migration.lstrip('0'))-1).zfill(4)
 
@@ -75,22 +78,22 @@ class Migration(object):
                 display_direction(self.direction),
                 self.migration)
 
-    def migrate(self, options):
+    def migrate(self, manage_cmd, options):
         if self.direction == 'B':
             os.system('git checkout %s %s%s/migrations' % (self.old, self.prefix, self.app))
-        cmd = '%s migrate %s %s' % (self.manage_cmd, self.app, self.migration)
+        cmd = '%s migrate %s %s' % (manage_cmd, self.app, self.migration)
         if options.merge:
             cmd += " --merge"
         print cmd
         os.system(cmd)
         if self.direction == 'B':
             os.system('git reset HEAD %s %s%s/migrations' % (self.old, self.prefix, self.app))
-            os.system('git clean -f %s %s%s/migrations' %(self.old, self.prefix, self.app))
+            os.system('git clean -f %s %s%s/migrations' % (self.old, self.prefix, self.app))
 
 
 def post_checkout(old, new, options):
 
-    migrations = MigrationList()
+    migrations = MigrationList(options=options)
 
     cmd = 'git diff --name-status %s %s | grep /migrations/' % (
         old, new)
@@ -99,7 +102,7 @@ def post_checkout(old, new, options):
         # search for the migration number
         match = re.compile('\w+/migrations/\d+').search(filepath)
         if match:
-            app, text, migration = match.group().split('/')
+            app, _, migration = match.group().split('/')
             prefix = filepath.split(app)[0]
             if app and migration:
                 if status == 'D':
@@ -107,11 +110,11 @@ def post_checkout(old, new, options):
                 else:
                     direction = 'F'
                 migration = Migration(app,
-                        migration, direction, old=old, options=options, prefix=prefix)
+                        migration, old, direction=direction, prefix=prefix)
                 migrations.add(migration)
 
     migrations.plan()
-    migrations.migrate_all(options)
+    migrations.migrate_all()
 
 def main():
 
@@ -129,15 +132,16 @@ def main():
         if command == 'post-checkout':
             old = args[1]
             new = args[2]
-            post_checkout(old, new, options)
+            flag = args[3]
 
+            if old != new and flag == '1': 
+                post_checkout(old, new, options)
         elif command == 'install':
-
             cmd = '%s post-checkout $@' % CMD
             if options.manage:
-                cmd += ' --manage %s' %options.manage
+                cmd += ' --manage %s' % options.manage
             if options.settings:
-                cmd += ' --settings %s' %options.settings
+                cmd += ' --settings %s' % options.settings
             if options.merge:
                 cmd += ' --merge'
 
@@ -148,11 +152,8 @@ def main():
             f.close()
             os.system('chmod +x .git/hooks/post-checkout')
             print 'Compass installed!'
-
         else:
-
             print 'Use `%s install` to install to current repository' % CMD
-
     else:
         print 'Use `%s install` to install to current repository' % CMD
 
