@@ -55,4 +55,9 @@ assertCheckoutMigration branch1 'CREATE TABLE "baz_foo" ("bar1" varchar(20) NULL
 assertCheckoutMigration master 'CREATE TABLE "baz_foo" ("id" integer PRIMARY KEY, "name" varchar(20) NOT NULL);'
 assertCheckoutMigration branch2 'CREATE TABLE "baz_foo" ("bar2" varchar(20) NULL, "id" integer PRIMARY KEY, "name" varchar(20) NOT NULL);'
 assertCheckoutMigration master 'CREATE TABLE "baz_foo" ("id" integer PRIMARY KEY, "name" varchar(20) NOT NULL);'
+assertCheckoutMigration branch1 'CREATE TABLE "baz_foo" ("bar1" varchar(20) NULL, "id" integer PRIMARY KEY, "name" varchar(20) NOT NULL);'
+assertCheckoutMigration branch2 'CREATE TABLE "baz_foo" ("bar2" varchar(20) NULL, "id" integer PRIMARY KEY, "name" varchar(20) NOT NULL);'
+assertCheckoutMigration branch1 'CREATE TABLE "baz_foo" ("bar1" varchar(20) NULL, "id" integer PRIMARY KEY, "name" varchar(20) NOT NULL);'
+assertCheckoutMigration branch2 'CREATE TABLE "baz_foo" ("bar2" varchar(20) NULL, "id" integer PRIMARY KEY, "name" varchar(20) NOT NULL);'
+assertCheckoutMigration master 'CREATE TABLE "baz_foo" ("id" integer PRIMARY KEY, "name" varchar(20) NOT NULL);'
 clean

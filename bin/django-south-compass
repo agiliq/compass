@@ -82,7 +82,7 @@ class Migration(object):
         if self.direction == 'B':
             os.system('git checkout %s %s%s/migrations' % (self.old, self.prefix, self.app))
         cmd = '%s migrate %s %s' % (manage_cmd, self.app, self.migration)
-        if options.merge:
+        if not options.no_merge:
             cmd += " --merge"
         print cmd
         os.system(cmd)
@@ -121,7 +121,7 @@ def main():
     parser = OptionParser()
 
     parser.add_option("-m", "--manage")
-    parser.add_option("-M", "--merge", action="store_true")
+    parser.add_option("-M", "--no-merge", action="store_true")
     parser.add_option("-s", "--settings")
 
     options, args = parser.parse_args()
@@ -142,8 +142,8 @@ def main():
                 cmd += ' --manage %s' % options.manage
             if options.settings:
                 cmd += ' --settings %s' % options.settings
-            if options.merge:
-                cmd += ' --merge'
+            if options.no_merge:
+                cmd += ' --no-merge'
 
             f = file('.git/hooks/post-checkout', 'w')
             f.write('#!/bin/bash\n')
