@@ -134,7 +134,7 @@ def main():
             new = args[2]
             flag = args[3]
 
-            if old != new and flag == '1': 
+            if old != new and flag == '1':
                 post_checkout(old, new, options)
         elif command == 'install':
             cmd = '%s post-checkout $@' % CMD
@@ -151,7 +151,15 @@ def main():
             f.write(cmd)
             f.close()
             os.system('chmod +x .git/hooks/post-checkout')
-            print 'Compass installed!'
+            print """
+            Congrats! Django south compass has been installed to .git/hooks/post-checkout
+
+            Migrations added/deleted during checkout will now be automatically
+            synced with the database.
+
+            To uninstall, just edit or delete .git/hooks/post-checkout
+            """
+
         else:
             print 'Use `%s install` to install to current repository' % CMD
     else:
